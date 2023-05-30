@@ -70,7 +70,6 @@ function App() {
   }
   
   function isWordValid() {
-    console.log("Checking for validity");
     const currLevel = [...words[level]];
 
     // Checking and exiting if the size of the word is less than size
@@ -98,7 +97,6 @@ function App() {
   function displayDifferences(): boolean {
     const currLevel = [...words[level]];
     const newColoring = [...coloring];
-    console.log("Checking for display differrnces", target, currLevel)
     
     const charMap: number[] = Array(26).fill(0);
     for (let i = 0; i < size; i ++){
@@ -123,7 +121,6 @@ function App() {
          flag = true;
       }
     }
-    console.log(newColoring[level]);
     setColoring(newColoring);
     return flag;
   }
