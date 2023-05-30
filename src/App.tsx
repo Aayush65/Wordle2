@@ -11,11 +11,13 @@ function App() {
   const [level, setLevel] = useState<number>(0);
   // const [failed, setFailed] = useState<boolean>(false);
   // const [success, setSuccess] = useState<boolean>(false);
-  const [words, setWords] = useState<string[][]>(Array(size).fill('').map(() => Array(size).fill('')));
-  const [coloring, setColoring] = useState<string[][]>(Array(size).fill('').map(() => Array(size).fill("bg-gray-300")));
+  const [words, setWords] = useState<string[][]>(Array(size + 1).fill('').map(() => Array(size).fill('')));
+  const [coloring, setColoring] = useState<string[][]>(Array(size + 1).fill('').map(() => Array(size).fill("bg-gray-300")));
   
   const [dict, setDict] = useState<Set<string>>(new Set());
   const [target, setTarget] = useState<string>("");
+
+  const keyboard: string[][] = [['Q','W','E','R','T','Y','U','I','O','P'],['A','S','D','F','G','H','J','K','L'],['↵','Z','X','C','V','B','N','M','⌫']]
 
   // sets a new target word, and reinitialises the correct words array every time size is changed
   useEffect(() => {
@@ -27,17 +29,16 @@ function App() {
 
   // sets a eventlistener everytime the page is to be rendered.
   useEffect(() => {
-    window.addEventListener('keyup', handleLetterChange);
-    return () => window.removeEventListener('keyup', handleLetterChange);
+    window.addEventListener('keyup', (e) => handleLetterChange(e.key));
+    return () => window.removeEventListener('keyup', (e) => handleLetterChange(e.key));
   })
 
-  function handleLetterChange(e: KeyboardEvent) {
-    const letter = e.key;
+  function handleLetterChange(letter: string) {
     if (/^[A-Za-z]$/.test(letter))
       addLetter(letter);
-    if (letter === "Backspace")
+    if (letter === "Backspace" || letter === "⌫")
       removeLetter();
-    if (letter === "Enter")
+    if (letter === "Enter" || letter === "↵")
       isWordValid();
   }
   
@@ -89,7 +90,7 @@ function App() {
 
     // If it is valid, then checking if it is the right word
     if (displayDifferences())
-      if (level !== size)
+      if (level !== size + 1)
         // setFailed(true);
         setLevel(level + 1);
   }  
@@ -129,12 +130,12 @@ function App() {
     setLevel(0);
     // setFailed(false);
     // setSuccess(false);
-    setWords(Array(size).fill('').map(() => Array(size).fill('')));
-    setColoring(Array(size).fill('').map(() => Array(size).fill("bg-gray-300")));
+    setWords(Array(size + 1).fill('').map(() => Array(size).fill('')));
+    setColoring(Array(size + 1).fill('').map(() => Array(size).fill("bg-gray-300")));
   }
 
   return (
-    <div className='flex flex-col items-center justify-center gap-10'>
+    <div className='flex flex-col items-center justify-center gap-7'>
       <div className='flex flex-col items-center justify-center'>
         {words.map((word, wordIdx) => (
           <div key={wordIdx} className='flex'>
@@ -145,11 +146,19 @@ function App() {
         ))}
       </div>
       <div className='flex gap-5'>
-        <button type="submit" className='grid place-items-center pt-5 pb-5 pl-7 pr-7 bg-blue-400' onClick={() => setSize(4)}>4</button>
-        <button type="submit" className='grid place-items-center pt-5 pb-5 pl-7 pr-7 bg-blue-400' onClick={() => setSize(5)}>5</button>
-        <button type="submit" className='grid place-items-center pt-5 pb-5 pl-7 pr-7 bg-blue-400' onClick={() => setSize(6)}>6</button>
-        <button type="submit" className='grid place-items-center pt-5 pb-5 pl-7 pr-7 bg-blue-400' onClick={() => setSize(7)}>7</button>
+        <button type="submit" className='grid place-items-center px-5 py-3 md:px-7 md:py-4 bg-blue-400' onClick={() => setSize(4)}>4</button>
+        <button type="submit" className='grid place-items-center px-5 py-3 md:px-7 md:py-4 bg-blue-400' onClick={() => setSize(5)}>5</button>
+        <button type="submit" className='grid place-items-center px-5 py-3 md:px-7 md:py-4 bg-blue-400' onClick={() => setSize(6)}>6</button>
       </div>
+      <div className='flex flex-col justify-center items-center'>
+        {keyboard.map((row, rowIdx) => (
+          <div key={rowIdx} className='flex justify-center items-center'>
+            {row.map((letter, letterIdx) => (
+              <button key={letterIdx} value={letter} className='flex justify-center items-center border-2 border-black w-8 h-8 md:w-16 md:h-16 font-bold text-xl' onClick={(e) => handleLetterChange((e.target as HTMLInputElement).value)}>{letter}</button>
+            ))}
+          </div>
+        ))}
+        </div>
     </div>
   )
 }
