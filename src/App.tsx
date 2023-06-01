@@ -116,18 +116,20 @@ function App() {
     for (let i = 0; i < size; i ++) {
       let idx = currLevel[i].charCodeAt(0) - 'A'.charCodeAt(0);
       if (currLevel[i] === target[i]) {
-         newColoring[level][i] = 'bg-green-300';
-         charMap[idx] --;
+          newColoring[level][i] = 'bg-green-300';
+          charMap[idx] --;
       }
-      else if (charMap[idx] == currCharMap[idx]){
-         newColoring[level][i] = 'bg-yellow-300';
-         charMap[idx] --;
-         flag = true;
+      else if (charMap[idx] >= currCharMap[idx]){
+          newColoring[level][i] = 'bg-yellow-300';
+          charMap[idx] --;
+          flag = true;
       }
       else {
-         newColoring[level][i] = 'bg-red-300';
-         newKeyStatus[idx] = true;
-         flag = true;
+          newColoring[level][i] = 'bg-red-300';
+          console.log(currLevel[i], target, target.includes(currLevel[i]))
+          if (!target.includes(currLevel[i]))
+              newKeyStatus[idx] = true;
+          flag = true;
       }
       currCharMap[idx] --;
     }
