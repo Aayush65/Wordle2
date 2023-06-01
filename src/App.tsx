@@ -16,6 +16,7 @@ function App() {
   
   const [dict, setDict] = useState<Set<string>>(new Set());
   const [target, setTarget] = useState<string>("");
+  const [keyStatus, setKeyStatus] = useState<boolean[]>(Array(26).fill(false));
 
   const keyboard: string[][] = [['Q','W','E','R','T','Y','U','I','O','P'],['A','S','D','F','G','H','J','K','L'],['↵','Z','X','C','V','B','N','M','⌫']]
 
@@ -29,8 +30,13 @@ function App() {
 
   // sets a eventlistener everytime the page is to be rendered.
   useEffect(() => {
-    window.addEventListener('keyup', (e) => handleLetterChange(e.key));
-    return () => window.removeEventListener('keyup', (e) => handleLetterChange(e.key));
+    const handleKeyDown = (event: KeyboardEvent) => {
+      console.log(event.key);
+      handleLetterChange(event.key);
+    }; 
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   })
 
   function handleLetterChange(letter: string) {
@@ -105,6 +111,7 @@ function App() {
       charMap[idx] ++;
     }
     
+    let newKeyStatus = [...keyStatus];
     let flag = false;
     for (let i = 0; i < size; i ++) {
       let idx = currLevel[i].charCodeAt(0) - 'A'.charCodeAt(0);
@@ -115,13 +122,15 @@ function App() {
       else if (charMap[idx]){
          newColoring[level][i] = 'bg-yellow-300';
          charMap[idx] --;
-         flag = true
+         flag = true;
       }
       else {
          newColoring[level][i] = 'bg-red-300';
+         newKeyStatus[idx] = true;
          flag = true;
       }
     }
+    setKeyStatus(newKeyStatus);
     setColoring(newColoring);
     return flag;
   }
@@ -132,6 +141,7 @@ function App() {
     // setSuccess(false);
     setWords(Array(size + 1).fill('').map(() => Array(size).fill('')));
     setColoring(Array(size + 1).fill('').map(() => Array(size).fill("bg-gray-300")));
+    setKeyStatus(Array(26).fill(false));
   }
 
   return (
@@ -154,7 +164,7 @@ function App() {
         {keyboard.map((row, rowIdx) => (
           <div key={rowIdx} className='flex justify-center items-center'>
             {row.map((letter, letterIdx) => (
-              <button key={letterIdx} value={letter} className='flex justify-center items-center border-2 border-black w-8 h-8 md:w-16 md:h-16 font-bold text-xl' onClick={(e) => handleLetterChange((e.target as HTMLInputElement).value)}>{letter}</button>
+              <button key={letterIdx} value={letter} className={`flex justify-center items-center border-2 border-black w-9 h-9 md:w-16 md:h-16 font-bold text-xl ${keyStatus[letter.charCodeAt(0) - 'A'.charCodeAt(0)] ? 'bg-gray-300' : ''}`} onClick={(e) => handleLetterChange((e.target as HTMLInputElement).value)}>{letter}</button>
             ))}
           </div>
         ))}
@@ -163,4 +173,4 @@ function App() {
   )
 }
 
-export default App
+export default App;
