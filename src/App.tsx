@@ -18,7 +18,7 @@ function App() {
   const [target, setTarget] = useState<string>("");
   const [keyStatus, setKeyStatus] = useState<boolean[]>(Array(26).fill(false));
 
-  const keyboard: string[][] = [['Q','W','E','R','T','Y','U','I','O','P'],['A','S','D','F','G','H','J','K','L'],['↵','Z','X','C','V','B','N','M','⌫']]
+  const keyboard: string[][] = [['Q','W','E','R','T','Y','U','I','O','P'],['A','S','D','F','G','H','J','K','L'],['⏎','Z','X','C','V','B','N','M','⌫']]
 
   // sets a new target word, and reinitialises the correct words array every time size is changed
   useEffect(() => {
@@ -30,10 +30,7 @@ function App() {
 
   // sets a eventlistener everytime the page is to be rendered.
   useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      console.log(event.key);
-      handleLetterChange(event.key);
-    }; 
+    const handleKeyDown = (event: KeyboardEvent) => handleLetterChange(event.key);
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
@@ -106,9 +103,12 @@ function App() {
     const newColoring = [...coloring];
     
     const charMap: number[] = Array(26).fill(0);
+    const currCharMap: number[] = Array(26).fill(0);
     for (let i = 0; i < size; i ++){
-      let idx = target[i].charCodeAt(0) - 'A'.charCodeAt(0);
-      charMap[idx] ++;
+      let idx1 = target[i].charCodeAt(0) - 'A'.charCodeAt(0);
+      let idx2 = currLevel[i].charCodeAt(0) - 'A'.charCodeAt(0);
+      charMap[idx1] ++;
+      currCharMap[idx2] ++;
     }
     
     let newKeyStatus = [...keyStatus];
@@ -119,7 +119,7 @@ function App() {
          newColoring[level][i] = 'bg-green-300';
          charMap[idx] --;
       }
-      else if (charMap[idx]){
+      else if (charMap[idx] == currCharMap[idx]){
          newColoring[level][i] = 'bg-yellow-300';
          charMap[idx] --;
          flag = true;
@@ -129,6 +129,7 @@ function App() {
          newKeyStatus[idx] = true;
          flag = true;
       }
+      currCharMap[idx] --;
     }
     setKeyStatus(newKeyStatus);
     setColoring(newColoring);
