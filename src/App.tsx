@@ -178,7 +178,7 @@ function App() {
         {keyboard.map((row, rowIdx) => (
           <div key={rowIdx} className='flex justify-center items-center'>
             {row.map((letter, letterIdx) => (
-              <button key={letterIdx} value={letter} className={`flex justify-center items-center border-2 border-black w-9 h-9 md:w-16 md:h-16 font-bold text-xl ${keyStatus[letter.charCodeAt(0) - 'A'.charCodeAt(0)] ? 'bg-gray-300' : ''}`} onClick={(e) => handleLetterChange((e.target as HTMLInputElement).value)}>{letter}</button>
+              <button key={letterIdx} value={letter} className={`flex justify-center items-center border-2 border-black w-9 h-9 md:w-12 md:h-12 font-bold text-xl ${keyStatus[letter.charCodeAt(0) - 'A'.charCodeAt(0)] ? 'bg-gray-300' : ''}`} onClick={(e) => handleLetterChange((e.target as HTMLInputElement).value)}>{letter}</button>
             ))}
           </div>
         ))}
