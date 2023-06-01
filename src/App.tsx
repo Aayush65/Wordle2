@@ -29,20 +29,31 @@ function App() {
   }, [size])
 
   // sets a eventlistener everytime the page is to be rendered.
+  const [isKeyPressed, setIsKeyPressed] = useState<boolean>(false);
   useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => handleLetterChange(event.key);
+    const handleKeyDown = (event: KeyboardEvent) => {
+      setIsKeyPressed(true);
+      handleLetterChange(event.key)
+    };
+    const handleKeyUp = () => setIsKeyPressed(false);
 
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    }
   })
 
   function handleLetterChange(letter: string) {
-    if (/^[A-Za-z]$/.test(letter))
+    if (!isKeyPressed && letter !== "Backspace"){
+      if (/^[A-Za-z]$/.test(letter))
       addLetter(letter);
+      if (letter === "Enter" || letter === "↵")
+        isWordValid();
+    }
     if (letter === "Backspace" || letter === "⌫")
       removeLetter();
-    if (letter === "Enter" || letter === "↵")
-      isWordValid();
   }
   
   function addLetter(letter: string) {
