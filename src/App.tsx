@@ -9,8 +9,6 @@ interface WordDictionary {
 function App() {
   const [size, setSize] = useState<number>(5);
   const [level, setLevel] = useState<number>(0);
-  // const [failed, setFailed] = useState<boolean>(false);
-  // const [success, setSuccess] = useState<boolean>(false);
   const [words, setWords] = useState<string[][]>(Array(size + 1).fill('').map(() => Array(size).fill('')));
   const [coloring, setColoring] = useState<string[][]>(Array(size + 1).fill('').map(() => Array(size).fill("bg-gray-300")));
   
@@ -29,29 +27,20 @@ function App() {
   }, [size])
 
   // sets a eventlistener everytime the page is to be rendered.
-  const [isKeyPressed, setIsKeyPressed] = useState<boolean>(false);
   useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      setIsKeyPressed(true);
-      handleLetterChange(event.key)
-    };
-    const handleKeyUp = () => setIsKeyPressed(false);
+    const handleKeyDown = (event: KeyboardEvent) => handleLetterChange(event.key);
 
     window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('keyup', handleKeyUp);
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('keyup', handleKeyUp);
     }
   })
 
   function handleLetterChange(letter: string) {
-    if (!isKeyPressed && letter !== "Backspace"){
-      if (/^[A-Za-z]$/.test(letter))
+    if (/^[A-Za-z]$/.test(letter))
       addLetter(letter);
-      if (letter === "Enter" || letter === "↵")
-        isWordValid();
-    }
+    if (letter === "Enter" || letter === "⏎")
+      isWordValid();
     if (letter === "Backspace" || letter === "⌫")
       removeLetter();
   }
@@ -68,7 +57,7 @@ function App() {
     }
     const newWords = [...words];
     newWords[level] = currLevel;
-    setWords(newWords);    
+    setWords(newWords);
   }
   
   function removeLetter() {
@@ -104,8 +93,6 @@ function App() {
 
     // If it is valid, then checking if it is the right word
     if (displayDifferences())
-      if (level !== size + 1)
-        // setFailed(true);
         setLevel(level + 1);
   }  
   
@@ -137,7 +124,6 @@ function App() {
       }
       else {
           newColoring[level][i] = 'bg-red-300';
-          console.log(currLevel[i], target, target.includes(currLevel[i]))
           if (!target.includes(currLevel[i]))
               newKeyStatus[idx] = true;
           flag = true;
@@ -151,8 +137,6 @@ function App() {
 
   function handleReset() {
     setLevel(0);
-    // setFailed(false);
-    // setSuccess(false);
     setWords(Array(size + 1).fill('').map(() => Array(size).fill('')));
     setColoring(Array(size + 1).fill('').map(() => Array(size).fill("bg-gray-300")));
     setKeyStatus(Array(26).fill(false));
@@ -160,11 +144,12 @@ function App() {
 
   return (
     <div className='flex flex-col items-center justify-center gap-7'>
-      <div className='flex flex-col items-center justify-center'>
+      {level === size + 1 ? <div className='flex flex-col items-center justify-center absolute top-0 text-white bg-gray-700 rounded-xl font-semibold p-3'>{target}</div> : null}
+      <div className='flex flex-col items-center justify-center bg-black rounded-md'>
         {words.map((word, wordIdx) => (
           <div key={wordIdx} className='flex'>
             {word.map((letter, letterIdx) => (
-              <div key={letterIdx} className={`${coloring[wordIdx][letterIdx]} flex justify-center items-center border-2 border-black w-14 h-14 md:w-16 md:h-16 font-bold text-xl `}>{letter}</div>
+              <div key={letterIdx} className={`${coloring[wordIdx][letterIdx]} flex justify-center rounded-md items-center border-2 border-black w-14 h-14 md:w-16 md:h-16 font-bold text-xl `}>{letter}</div>
             ))}
           </div>
         ))}
