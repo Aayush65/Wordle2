@@ -174,7 +174,7 @@ function App() {
       : null}
       {isComplete && isDescToggle ? 
         <div className='flex items-center justify-center max-w-xs md:max-w-sm absolute top-10 md:right-10 p-3 bg-gray-600 rounded-xl text-white z-9 opacity-80'>
-          {(dictionary as WordDict)[target.toLowerCase()]}
+          {dictionary[target.toLowerCase()]}
         </div>
       : null}
       <div className='flex flex-col items-center justify-center bg-black rounded-md'>
