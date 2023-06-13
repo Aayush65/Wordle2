@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
-import correctWords from './assets/words.json';
-import dictionary from './assets/dictionary.json';
-
+import words from './words.json';
+import { getDictionary } from './dictionary';
 import './App.css';
 
 interface WordList {
@@ -15,7 +14,7 @@ interface WordDict {
 function App() {
   const [size, setSize] = useState<number>(5);
   const [level, setLevel] = useState<number>(0);
-  const [words, setWords] = useState<string[][]>(Array(size + 1).fill('').map(() => Array(size).fill('')));
+  const [inputs, setInputs] = useState<string[][]>(Array(size + 1).fill('').map(() => Array(size).fill('')));
   const [coloring, setColoring] = useState<string[][]>(Array(size + 1).fill('').map(() => Array(size).fill("bg-gray-300")));
   const [isComplete, setIsComplete] = useState<boolean>(false);
 
@@ -24,15 +23,26 @@ function App() {
   const [dict, setDict] = useState<Set<string>>(new Set());
   const [target, setTarget] = useState<string>("");
   const [keyStatus, setKeyStatus] = useState<boolean[]>(Array(26).fill(false));
-
-  // const [dictionary, setDictionary] = useState<WordDict>({});
+  
+  const [dictionary, setDictionary] = useState<WordDict>({});
+  
   const keyboard: string[][] = [['Q','W','E','R','T','Y','U','I','O','P'],['A','S','D','F','G','H','J','K','L'],['⏎','Z','X','C','V','B','N','M','⌫']]
-
-  // sets a new target word, and reinitialises the correct words array every time size is changed
+  
+  // dynamically imports the dictionary and inputs file based on the status of completion
   useEffect(() => {
-    setDict(new Set((correctWords as WordList)[size.toString()]));
-    const dictSize = (correctWords as WordList)[size.toString()].length;
-    setTarget((correctWords as WordList)[size.toString()][Math.floor(Math.random() * dictSize)]);
+    const fetchDictionary = async () => {
+      const response = await getDictionary();
+      setDictionary(response);
+    };
+
+    fetchDictionary();
+  }, [])
+
+  // sets a new target word, and reinitialises the correct inputs array every time size is changed
+  useEffect(() => {
+    setDict(new Set((words as WordList)[size.toString()]));
+    const dictSize = (words as WordList)[size.toString()].length;
+    setTarget((words as WordList)[size.toString()][Math.floor(Math.random() * dictSize)]);
     handleReset();
   }, [size])
 
@@ -46,16 +56,6 @@ function App() {
     }
   })
 
-  // dynamically imports the dictionary file based on the status of completion
-  // useEffect(() => {
-  //   const fetchDictionary = async () => {
-  //     const response = await import('./assets/dictionary.json');
-  //     console.log(response);
-  //   };
-
-  //   fetchDictionary();
-  // }, [isComplete])
-
   function handleLetterChange(letter: string) {
     if (/^[A-Za-z]$/.test(letter))
       addLetter(letter);
@@ -67,7 +67,7 @@ function App() {
   
   function addLetter(letter: string) {
     letter = letter.toUpperCase();
-    const currLevel = [...words[level]];
+    const currLevel = [...inputs[level]];
     
     for (let i = 0; i < size; i++) {
       if (currLevel[i] === '') {
@@ -75,26 +75,26 @@ function App() {
         break;
       }
     }
-    const newWords = [...words];
-    newWords[level] = currLevel;
-    setWords(newWords);
+    const newinputs = [...inputs];
+    newinputs[level] = currLevel;
+    setInputs(newinputs);
   }
   
   function removeLetter() {
-    const currLevel = [...words[level]];
+    const currLevel = [...inputs[level]];
     for (let i = size - 1; i >= 0; i--) {
       if (currLevel[i] !== '') {
         currLevel[i] = '';
         break;
       }
     }
-    const newWords = [...words];
-    newWords[level] = currLevel;
-    setWords(newWords);    
+    const newinputs = [...inputs];
+    newinputs[level] = currLevel;
+    setInputs(newinputs);    
   }
   
   function isWordValid() {
-    const currLevel = [...words[level]];
+    const currLevel = [...inputs[level]];
 
     // Checking and exiting if the size of the word is less than size
     for (let i = 0; i < size; i++)
@@ -105,9 +105,9 @@ function App() {
     if (!dict.has(currLevel.join(""))){
       for (let i = 0; i < size; i++)
         currLevel[i] = "";
-      const newWords = [...words];
-      newWords[level] = currLevel;
-      setWords(newWords);
+      const newinputs = [...inputs];
+      newinputs[level] = currLevel;
+      setInputs(newinputs);
       return;
     }
 
@@ -119,7 +119,7 @@ function App() {
   }  
   
   function displayDifferences(): boolean {
-    const currLevel = [...words[level]];
+    const currLevel = [...inputs[level]];
     const newColoring = [...coloring];
     
     const charMap: number[] = Array(26).fill(0);
@@ -161,7 +161,7 @@ function App() {
 
   function handleReset() {
     setLevel(0);
-    setWords(Array(size + 1).fill('').map(() => Array(size).fill('')));
+    setInputs(Array(size + 1).fill('').map(() => Array(size).fill('')));
     setColoring(Array(size + 1).fill('').map(() => Array(size).fill("bg-gray-300")));
     setKeyStatus(Array(26).fill(false));
     setIsComplete(false);
@@ -170,15 +170,15 @@ function App() {
   return (
     <div className='flex flex-col items-center justify-center gap-7'>
       {isComplete ? 
-        <button onClick={() => setIsDescToggle(!isDescToggle)} className='flex items-center justify-center absolute top-0 text-white bg-gray-700 rounded-xl font-semibold p-3'>{target}</button>
+        <button onClick={() => setIsDescToggle(!isDescToggle)} className='flex items-center justify-center absolute top-0 text-white bg-gray-700 rounded-xl font-semibold p-3 z-10'>{target}</button>
       : null}
       {isComplete && isDescToggle ? 
-        <div className='flex items-center justify-center max-w-xs md:max-w-sm absolute top-10 md:right-10 p-3 bg-gray-600 rounded-xl text-white'>
+        <div className='flex items-center justify-center max-w-xs md:max-w-sm absolute top-10 md:right-10 p-3 bg-gray-600 rounded-xl text-white z-9 opacity-80'>
           {(dictionary as WordDict)[target.toLowerCase()]}
         </div>
       : null}
       <div className='flex flex-col items-center justify-center bg-black rounded-md'>
-        {words.map((word, wordIdx) => (
+        {inputs.map((word, wordIdx) => (
           <div key={wordIdx} className='flex'>
             {word.map((letter, letterIdx) => (
               <div key={letterIdx} className={`${coloring[wordIdx][letterIdx]} flex justify-center rounded-md items-center border-2 border-black w-14 h-14 md:w-16 md:h-16 font-bold text-xl`}>{letter}</div>
