@@ -1,9 +1,15 @@
 import { useEffect, useState } from 'react';
-import correctWords from './words.json';
+import correctWords from './assets/words.json';
+import dictionary from './assets/dictionary.json';
+
 import './App.css';
 
-interface WordDictionary {
+interface WordList {
   [key: string]: string[];
+}
+
+interface WordDict {
+  [key: string]: string;
 }
 
 function App() {
@@ -11,18 +17,22 @@ function App() {
   const [level, setLevel] = useState<number>(0);
   const [words, setWords] = useState<string[][]>(Array(size + 1).fill('').map(() => Array(size).fill('')));
   const [coloring, setColoring] = useState<string[][]>(Array(size + 1).fill('').map(() => Array(size).fill("bg-gray-300")));
+  const [isComplete, setIsComplete] = useState<boolean>(false);
+
+  const [isDescToggle, setIsDescToggle] = useState<boolean>(false);
   
   const [dict, setDict] = useState<Set<string>>(new Set());
   const [target, setTarget] = useState<string>("");
   const [keyStatus, setKeyStatus] = useState<boolean[]>(Array(26).fill(false));
 
+  // const [dictionary, setDictionary] = useState<WordDict>({});
   const keyboard: string[][] = [['Q','W','E','R','T','Y','U','I','O','P'],['A','S','D','F','G','H','J','K','L'],['⏎','Z','X','C','V','B','N','M','⌫']]
 
   // sets a new target word, and reinitialises the correct words array every time size is changed
   useEffect(() => {
-    setDict(new Set((correctWords as WordDictionary)[size.toString()]));
-    const dictSize = (correctWords as WordDictionary)[size.toString()].length;
-    setTarget((correctWords as WordDictionary)[size.toString()][Math.floor(Math.random() * dictSize)]);
+    setDict(new Set((correctWords as WordList)[size.toString()]));
+    const dictSize = (correctWords as WordList)[size.toString()].length;
+    setTarget((correctWords as WordList)[size.toString()][Math.floor(Math.random() * dictSize)]);
     handleReset();
   }, [size])
 
@@ -35,6 +45,16 @@ function App() {
       window.removeEventListener('keydown', handleKeyDown);
     }
   })
+
+  // dynamically imports the dictionary file based on the status of completion
+  // useEffect(() => {
+  //   const fetchDictionary = async () => {
+  //     const response = await import('./assets/dictionary.json');
+  //     console.log(response);
+  //   };
+
+  //   fetchDictionary();
+  // }, [isComplete])
 
   function handleLetterChange(letter: string) {
     if (/^[A-Za-z]$/.test(letter))
@@ -93,6 +113,8 @@ function App() {
 
     // If it is valid, then checking if it is the right word
     if (displayDifferences())
+        if (level === size)
+          setIsComplete(true);
         setLevel(level + 1);
   }  
   
@@ -132,6 +154,8 @@ function App() {
     }
     setKeyStatus(newKeyStatus);
     setColoring(newColoring);
+    if (!flag)
+      setIsComplete(true);
     return flag;
   }
 
@@ -140,16 +164,24 @@ function App() {
     setWords(Array(size + 1).fill('').map(() => Array(size).fill('')));
     setColoring(Array(size + 1).fill('').map(() => Array(size).fill("bg-gray-300")));
     setKeyStatus(Array(26).fill(false));
+    setIsComplete(false);
   }
 
   return (
     <div className='flex flex-col items-center justify-center gap-7'>
-      {level === size + 1 ? <div className='flex flex-col items-center justify-center absolute top-0 text-white bg-gray-700 rounded-xl font-semibold p-3'>{target}</div> : null}
+      {isComplete ? 
+        <button onClick={() => setIsDescToggle(!isDescToggle)} className='flex items-center justify-center absolute top-0 text-white bg-gray-700 rounded-xl font-semibold p-3'>{target}</button>
+      : null}
+      {isComplete && isDescToggle ? 
+        <div className='flex items-center justify-center max-w-xs md:max-w-sm absolute top-10 md:right-10 p-3 bg-gray-600 rounded-xl text-white'>
+          {(dictionary as WordDict)[target.toLowerCase()]}
+        </div>
+      : null}
       <div className='flex flex-col items-center justify-center bg-black rounded-md'>
         {words.map((word, wordIdx) => (
           <div key={wordIdx} className='flex'>
             {word.map((letter, letterIdx) => (
-              <div key={letterIdx} className={`${coloring[wordIdx][letterIdx]} flex justify-center rounded-md items-center border-2 border-black w-14 h-14 md:w-16 md:h-16 font-bold text-xl `}>{letter}</div>
+              <div key={letterIdx} className={`${coloring[wordIdx][letterIdx]} flex justify-center rounded-md items-center border-2 border-black w-14 h-14 md:w-16 md:h-16 font-bold text-xl`}>{letter}</div>
             ))}
           </div>
         ))}
