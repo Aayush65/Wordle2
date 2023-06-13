@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import words from './words.json';
-import { getDictionary } from './dictionary';
+import words from './constants/words.json';
+import dictionary from './constants/dictionary.json';
 import './App.css';
 
 interface WordList {
@@ -24,19 +24,19 @@ function App() {
   const [target, setTarget] = useState<string>("");
   const [keyStatus, setKeyStatus] = useState<boolean[]>(Array(26).fill(false));
   
-  const [dictionary, setDictionary] = useState<WordDict>({});
+  // const [dictionary, setDictionary] = useState<WordDict>({});
   
   const keyboard: string[][] = [['Q','W','E','R','T','Y','U','I','O','P'],['A','S','D','F','G','H','J','K','L'],['⏎','Z','X','C','V','B','N','M','⌫']]
   
   // dynamically imports the dictionary and inputs file based on the status of completion
-  useEffect(() => {
-    const fetchDictionary = async () => {
-      const response = await getDictionary();
-      setDictionary(response);
-    };
+  // useEffect(() => {
+  //   const fetchDictionary = async () => {
+  //     const response = await getDictionary();
+  //     setDictionary(response);
+  //   };
 
-    fetchDictionary();
-  }, [])
+  //   fetchDictionary();
+  // }, [])
 
   // sets a new target word, and reinitialises the correct inputs array every time size is changed
   useEffect(() => {
@@ -174,7 +174,7 @@ function App() {
       : null}
       {isComplete && isDescToggle ? 
         <div className='flex items-center justify-center max-w-xs md:max-w-sm absolute top-10 md:right-10 p-3 bg-gray-600 rounded-xl text-white z-9 opacity-80'>
-          {dictionary[target.toLowerCase()]}
+          {(dictionary as WordDict)[target.toLowerCase()]}
         </div>
       : null}
       <div className='flex flex-col items-center justify-center bg-black rounded-md'>
