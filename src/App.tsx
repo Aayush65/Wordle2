@@ -24,20 +24,9 @@ function App() {
   const [target, setTarget] = useState<string>("");
   const [keyStatus, setKeyStatus] = useState<boolean[]>(Array(26).fill(false));
   
-  // const [dictionary, setDictionary] = useState<WordDict>({});
-  
   const keyboard: string[][] = [['Q','W','E','R','T','Y','U','I','O','P'],['A','S','D','F','G','H','J','K','L'],['⏎','Z','X','C','V','B','N','M','⌫']]
-  
-  // dynamically imports the dictionary and inputs file based on the status of completion
-  // useEffect(() => {
-  //   const fetchDictionary = async () => {
-  //     const response = await getDictionary();
-  //     setDictionary(response);
-  //   };
 
-  //   fetchDictionary();
-  // }, [])
-
+  console.log(dictionary);
   // sets a new target word, and reinitialises the correct inputs array every time size is changed
   useEffect(() => {
     setDict(new Set((words as WordList)[size.toString()]));
