@@ -19,6 +19,7 @@ function App() {
   const [isComplete, setIsComplete] = useState<boolean>(false);
 
   const [isDescToggle, setIsDescToggle] = useState<boolean>(false);
+  const [buttonTrigger, setButtonTrigger] = useState<boolean>(true);
   
   const [dict, setDict] = useState<Set<string>>(new Set());
   const [target, setTarget] = useState<string>("");
@@ -26,14 +27,15 @@ function App() {
   
   const keyboard: string[][] = [['Q','W','E','R','T','Y','U','I','O','P'],['A','S','D','F','G','H','J','K','L'],['⏎','Z','X','C','V','B','N','M','⌫']]
 
-  console.log(dictionary);
   // sets a new target word, and reinitialises the correct inputs array every time size is changed
   useEffect(() => {
+    if (!buttonTrigger)
+      return;
     setDict(new Set((words as WordList)[size.toString()]));
     const dictSize = (words as WordList)[size.toString()].length;
     setTarget((words as WordList)[size.toString()][Math.floor(Math.random() * dictSize)]);
     handleReset();
-  }, [size])
+  }, [buttonTrigger])
 
   // sets a eventlistener everytime the page is to be rendered.
   useEffect(() => {
@@ -149,6 +151,7 @@ function App() {
   }
 
   function handleReset() {
+    setButtonTrigger(false);
     setLevel(0);
     setInputs(Array(size + 1).fill('').map(() => Array(size).fill('')));
     setColoring(Array(size + 1).fill('').map(() => Array(size).fill("bg-gray-300")));
@@ -166,7 +169,7 @@ function App() {
           {(dictionary as WordDict)[target.toLowerCase()]}
         </div>
       : null}
-      <div className='flex flex-col items-center justify-center bg-black rounded-md'>
+      <div className='flex flex-col items-center justify-center bg-black rounded-md select-none'>
         {inputs.map((word, wordIdx) => (
           <div key={wordIdx} className='flex'>
             {word.map((letter, letterIdx) => (
@@ -175,12 +178,7 @@ function App() {
           </div>
         ))}
       </div>
-      <div className='flex gap-5'>
-        <button type="submit" className='grid place-items-center px-5 py-3 md:px-7 md:py-4 bg-blue-400' onClick={() => setSize(4)}>4</button>
-        <button type="submit" className='grid place-items-center px-5 py-3 md:px-7 md:py-4 bg-blue-400' onClick={() => setSize(5)}>5</button>
-        <button type="submit" className='grid place-items-center px-5 py-3 md:px-7 md:py-4 bg-blue-400' onClick={() => setSize(6)}>6</button>
-      </div>
-      <div className='flex flex-col justify-center items-center'>
+      <div className='flex flex-col justify-center items-center select-none'>
         {keyboard.map((row, rowIdx) => (
           <div key={rowIdx} className='flex justify-center items-center'>
             {row.map((letter, letterIdx) => (
@@ -188,7 +186,18 @@ function App() {
             ))}
           </div>
         ))}
-        </div>
+      </div>
+      <div className='flex gap-3 md:gap-5 items-center font-semibold select-none'>
+        No of Words: 
+        {[4,5,6].map((val, index) => (
+          <button key={index} className='grid place-items-center rounded-xl px-5 py-2 md:px-6 md:py-3 text-white bg-blue-500' 
+                  onClick={(e) => {
+                    setSize(val);
+                    setButtonTrigger(true);
+                    e.currentTarget.blur();
+                  }}>{size === val && level ? "Restart" : val}</button>
+        ))}
+      </div>
     </div>
   )
 }
