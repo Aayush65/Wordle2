@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import './App.css';
+import LoadingSpinner from './LoadingSpinner';
 
 interface WordList {
   [key: string]: string[];
@@ -39,6 +40,8 @@ function App() {
   // sets a new target word, and reinitialises the correct inputs array every time size is changed
   useEffect(() => {
     if (!buttonTrigger)
+      return;
+    if (!words || !dictionary)
       return;
     setDict(new Set((words as WordList)[size]));
     const dictSize = (words as WordList)[size.toString()].length;
@@ -178,7 +181,7 @@ function App() {
     setIsComplete(false);
   }
 
-  return (
+  return target ? (
     <div className='flex flex-col items-center justify-center gap-7'>
       {isComplete ? 
         <button onClick={() => setIsDescToggle(!isDescToggle)} className='flex items-center justify-center absolute top-0 text-white bg-gray-700 rounded-xl font-semibold p-3 z-10'>{target}</button>
@@ -218,7 +221,7 @@ function App() {
         ))}
       </div>
     </div>
-  )
+  ) : <div className="w-screen h-screen flex justify-center items-center p-5 md:p-10 text-xl md:text-2xl font-semibold gap-3"><LoadingSpinner />Loading...</div>;
 }
 
 export default App;
