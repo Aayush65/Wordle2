@@ -1,6 +1,4 @@
 import { useEffect, useState } from 'react';
-import words from './constants/words.json';
-import dictionary from './constants/dictionary.json';
 import './App.css';
 
 interface WordList {
@@ -19,22 +17,33 @@ function App() {
   const [isComplete, setIsComplete] = useState<boolean>(false);
 
   const [isDescToggle, setIsDescToggle] = useState<boolean>(false);
-  const [buttonTrigger, setButtonTrigger] = useState<boolean>(true);
+  const [buttonTrigger, setButtonTrigger] = useState<boolean>(false);
   
+  const [words, setWords] = useState<WordList>();
+  const [dictionary, setDictionary] = useState<WordDict>();
   const [dict, setDict] = useState<Set<string>>(new Set());
   const [target, setTarget] = useState<string>("");
   const [keyStatus, setKeyStatus] = useState<boolean[]>(Array(26).fill(false));
   
   const keyboard: string[][] = [['Q','W','E','R','T','Y','U','I','O','P'],['A','S','D','F','G','H','J','K','L'],['⏎','Z','X','C','V','B','N','M','⌫']]
 
+  useEffect(() => {
+    async function setNewWord() {
+      if (!words || !dictionary)
+        await getData();
+      setButtonTrigger(true);
+    }
+    setNewWord();
+  }, []);
+
   // sets a new target word, and reinitialises the correct inputs array every time size is changed
   useEffect(() => {
     if (!buttonTrigger)
       return;
-    setDict(new Set((words as WordList)[size.toString()]));
+    setDict(new Set((words as WordList)[size]));
     const dictSize = (words as WordList)[size.toString()].length;
     setTarget((words as WordList)[size.toString()][Math.floor(Math.random() * dictSize)]);
-    handleReset();
+    handleReset();  
   }, [buttonTrigger])
 
   // sets a eventlistener everytime the page is to be rendered.
@@ -46,6 +55,16 @@ function App() {
       window.removeEventListener('keydown', handleKeyDown);
     }
   })
+
+  async function getData() {
+    const [wordsResponse, dictionaryResponse] = await Promise.all([
+      fetch('/json/words.json').then(response => response.json()),
+      fetch('/json/dictionary.json').then(response => response.json())
+    ]);
+
+    setWords(wordsResponse);
+    setDictionary(dictionaryResponse);
+  }
 
   function handleLetterChange(letter: string) {
     if (/^[A-Za-z]$/.test(letter))
